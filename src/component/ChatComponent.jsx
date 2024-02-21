@@ -181,7 +181,7 @@ const ChatComponent = () => {
           ref={messageListRef}
           style={{ maxHeight: "400px", overflowY: "auto" }}
           scrollBehavior="smooth"
-          typingIndicator={isTyping ? <TypingIndicator content="Omni is typing" /> : null}
+          typingIndicator={isTyping ? <TypingIndicator content="Omni is thinking" /> : null}
         >
           {messages.map((message, i) => (
             <Message
