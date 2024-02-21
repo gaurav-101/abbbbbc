@@ -20,7 +20,7 @@ const Mission = () => {
       transparent: true,
     });
 
-    Live2DModel.from("public/resources/GirlCharacter/mao_pro_t02.model3.json", {
+    Live2DModel.from("/resources/GirlCharacter/mao_pro_t02.model3.json", {
       idleMotionGroup: "Idle",
     }).then((model) => {
       app.stage.addChild(model);
