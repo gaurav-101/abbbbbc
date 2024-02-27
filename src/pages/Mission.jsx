@@ -26,7 +26,7 @@ const Mission = () => {
       app.stage.addChild(model);
       model.anchor.set(0.5, 0.5);
       model.position.set(window.innerWidth / 2, window.innerHeight / 2);
-      model.scale.set(0.09, 0.09);
+      model.scale.set(0.18, 0.18);
 
       model.on("pointertap", () => {
         model.motion("Tap@Body");
