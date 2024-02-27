@@ -6,24 +6,20 @@ import {
   Message,
   TypingIndicator,
 } from '@chatscope/chat-ui-kit-react';
-// import Speech from 'speak-tts'
 
-
-// const API_KEY = "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";
 
 const API_KEY = import.meta.env.VITE_OPENAI_KEY;
 const ChatComponent = () => {
-  console.log(API_KEY);
   const [messages, setMessages] = useState([
     {
       message: "Hello, I'm Omni! Ask me anything!",
       sentTime: "just now",
-      sender: "Omni",
+      sender: "ChatGPT",
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const [inputValue, setInputValue] = useState('');
- // New state
+  const [isSpeaking, setIsSpeaking] = useState(false); // New state
   const messageListRef = useRef(null);
 
   useEffect(() => {
@@ -59,16 +55,17 @@ const ChatComponent = () => {
           sender: "ChatGPT",
         };
         setMessages((prevMessages) => [...prevMessages, chatGPTResponse]);
+        /////
+        // Set speaking indicator to true
+        setIsSpeaking(true);
         speakText(content);
       }
     } catch (error) {
       console.error("Error processing message:", error);
     } finally {
       setIsTyping(false);
-
+      setIsSpeaking(false); // Reset speaking 
       setInputValue(''); // Clear input after sending
-      /////////
-      return;
     }
   };
 
@@ -97,82 +94,24 @@ const ChatComponent = () => {
   
       return response.json();
   }
-  const [audioStatus, setAudioStatus] = useState(' ');
 
- const speakText = (text) => {
-  setAudioStatus('Preparing Voice');
+  const speakText = (text) => {
+    const synth = window.speechSynthesis;
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  // Filter voices to find a girlish and robotic voice
+  const girlishVoice = synth.getVoices().find(voice => voice.name.includes("Girl"));
   
-  // synth.speak(utterance);
-  if ('speechSynthesis' in window) {
-    
-    const msg = new SpeechSynthesisUtterance();
-    let voices = window.speechSynthesis.getVoices();
-
-    // If voices are not available, use a timeout to wait for voices to be loaded
-    if (voices.length === 0) {
-      setTimeout(() => {
-        voices = window.speechSynthesis.getVoices();
-        setVoiceAndSpeak();
-      }, 1000);
-    } else {
-      setVoiceAndSpeak();
-    }
-
-    
-
-    function setVoiceAndSpeak() {
-      setAudioStatus('🔊');
-      // Find a female voice
-      const femaleVoice = voices.find((voice) => voice.name.includes('Female'));
-
-      // Set the chosen voice
-      msg.voice = femaleVoice || voices[0]; // Default to the first available voice if not found
-      msg.text = text;
-
-      // Speak the text
-      msg.addEventListener('end', () => {
-        // Update audio status to empty string when voice is finished
-        setAudioStatus(' ');
-      });
-
-      speechSynthesis.speak(msg);
-      return;
-    }
-  } else {
-    console.error('SpeechSynthesis is not supported in this browser.');
-    return;
-  }
+  // Set the chosen voice
+  utterance.voice = girlishVoice || synth.getVoices()[0]; // Default to the first available voice if not found
   
+  utterance.onend = () => {
+    // Set speaking indicator to false after speech ends
+    setIsSpeaking(false);
   };
 
-
-// const speakText = async (text) => {
-//   try {
-//     const speech = new Speech()
-//     speech.setVoice('female')
-
-//     // Convert array buffer to Blob
-//     speech.speak({
-//       text: text,
-//   }).then(() => {
-//       console.log("Success !")
-//   }).catch(e => {
-//       console.error("An error occurred :", e)
-//   })
-
-//   } catch (error) {
-//     console.error("Error processing text-to-speech request:", error);
-//     setIsSpeaking(false);
-//   }
-// };
-
-
-
-
-// ... (existing code)
-
-
-
+  synth.speak(utterance);
+  };
 
   return (
     <div className="app-container" style={{ backgroundColor: "rgba(0, 0, 0, 0)", color: "#ccc", minHeight: "50vh", display: "flex", alignItems: "center", justifyContent: "center", zIndex: "3" }}>
@@ -194,15 +133,12 @@ const ChatComponent = () => {
                 borderRadius: "8px",
                 padding: "8px",
                 alignSelf: message.sender === "user" ? "flex-end" : "flex-start", // Align user messages to the right, AI messages to the left
-                fontSize: "14px", // Set the font size to your desired value
               }}
             />
           ))}
         </MessageList>
-        
         <form onSubmit={handleSendRequest}>
           <div style={{ display: "flex", marginTop: "10px" }}>
-          
             <input
               type="text"
               style={{ flex: "1", marginRight: "10px", padding: "8px", borderRadius: "8px", border: "1px solid #ccc" }}
@@ -224,19 +160,13 @@ const ChatComponent = () => {
               Send
             </button>
           </div>
-          
+          {isSpeaking && <div style={{ marginTop: '10px' }}>🔊 Preparing Voice...</div>}
         </form>
-        
-          <div className='audioStatus'>{`${audioStatus}`}</div>
-        
       </div>
     </div>
   )
 }
 
 export default ChatComponent;
-
-
-
 
 
